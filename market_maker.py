@@ -5,7 +5,7 @@ from simulation import run_simulation
 SPREAD = 0.10
 MAX_INV = 500
 INV_PENALTY = 0.01
-
+TRANSACTION_COST = 0.01
 
 def compute_quotes(mid_price, spread, inventory, inv_penalty=INV_PENALTY):
     inv_adjustment = inv_penalty * inventory
@@ -16,19 +16,31 @@ def compute_quotes(mid_price, spread, inventory, inv_penalty=INV_PENALTY):
 
 def fill_orders(orders, bid, ask, inventory, pnl, mid_price):
     trades = []
+
     for order in orders:
         if order == 1:
             if abs(inventory - 1) <= MAX_INV:
-                pnl += ask - mid_price
+                trade_pnl = ask - mid_price - TRANSACTION_COST
+                pnl += trade_pnl
                 inventory -= 1
-                trades.append({"side": "sell", "price": ask, "pnl_delta": ask - mid_price})
+                trades.append({
+                    "side": "sell",
+                    "price": round(ask, 4),
+                    "pnl_delta": round(trade_pnl, 4)
+                })
+
         elif order == -1:
             if abs(inventory + 1) <= MAX_INV:
-                pnl += mid_price - bid
+                trade_pnl = mid_price - bid - TRANSACTION_COST
+                pnl += trade_pnl
                 inventory += 1
-                trades.append({"side": "buy", "price": bid, "pnl_delta": mid_price - bid})
-    return inventory, pnl, trades
+                trades.append({
+                    "side": "buy",
+                    "price": round(bid, 4),
+                    "pnl_delta": round(trade_pnl, 4)
+                })
 
+    return inventory, pnl, trades
 
 def run_market_maker(spread=SPREAD, inv_penalty=INV_PENALTY, seed=42):
     sim = run_simulation(seed=seed)
