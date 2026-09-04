@@ -43,8 +43,11 @@ def generate_order_flow(n_steps=N_STEPS, lam=LAMBDA, seed=SEED):
 
     Poisson process is the standard model for order arrival in market microstructure
     because orders arrive randomly but at a predictable average rate.
+
+    The seed offset is large so that consecutive seeds in a Monte Carlo sweep
+    never reuse another run's price path stream.
     """
-    np.random.seed(seed + 1)
+    np.random.seed(seed + 10000)
 
     order_flow = []
 
@@ -56,31 +59,37 @@ def generate_order_flow(n_steps=N_STEPS, lam=LAMBDA, seed=SEED):
     return order_flow
 
 
-def run_simulation(n_steps=N_STEPS, dt=DT, s0=S0, mu=MU, sigma=SIGMA, lam=LAMBDA, seed=SEED):
+def run_simulation(n_steps=N_STEPS, dt=DT, s0=S0, mu=MU, sigma=SIGMA, lam=LAMBDA, seed=SEED, verbose=True):
     """
     Master function that runs the full simulation.
     Returns prices and order flow packaged as a dictionary.
+
+    Set verbose=False when running many simulations in a loop.
     """
-    print("Generating price path...")
+    if verbose:
+        print("Generating price path...")
     prices = generate_price_path(n_steps, dt, s0, mu, sigma, seed)
 
-    print("Generating order flow...")
+    if verbose:
+        print("Generating order flow...")
     order_flow = generate_order_flow(n_steps, lam, seed)
 
-    print(f"\nSimulation complete.")
-    print(f"Steps      : {n_steps}")
-    print(f"Start price: ${prices[0]:.2f}")
-    print(f"End price  : ${prices[-1]:.2f}")
-    print(f"Min price  : ${prices.min():.2f}")
-    print(f"Max price  : ${prices.max():.2f}")
-    print(f"Total orders: {sum(len(o) for o in order_flow)}")
+    if verbose:
+        print(f"\nSimulation complete.")
+        print(f"Steps      : {n_steps}")
+        print(f"Start price: ${prices[0]:.2f}")
+        print(f"End price  : ${prices[-1]:.2f}")
+        print(f"Min price  : ${prices.min():.2f}")
+        print(f"Max price  : ${prices.max():.2f}")
+        print(f"Total orders: {sum(len(o) for o in order_flow)}")
 
     return {
         "prices":     prices,
         "order_flow": order_flow,
         "n_steps":    n_steps,
         "dt":         dt,
-        "sigma":      sigma
+        "sigma":      sigma,
+        "seed":       seed
     }
 
 

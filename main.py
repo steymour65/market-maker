@@ -7,14 +7,13 @@ def main():
     print("    MARKET MAKING SIMULATOR")
     print("="*55)
 
-    print("\nRunning all three strategies...")
-    results = run_strategies()
-
     sim = run_simulation()
-    prices = sim["prices"]
+
+    print("\nRunning all three strategies...")
+    results = run_strategies(sim)
 
     print("\nRunning analytics...")
-    run_analytics(results, prices)
+    run_analytics(results, sim["prices"])
 
     print("\n" + "="*55)
     print(" SIMULATION COMPLETE")
@@ -23,4 +22,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
